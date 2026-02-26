@@ -8,20 +8,19 @@ $stdpwd = "DefautlPassword"
 
 Write-Host " RESET PASSWORD SCRIPT " -BackgroundColor White -ForegroundColor Black
 
-$username = Read-Host `n"Enter the users lastname"
+do {
+    $username = Read-Host `n"Enter the users lastname"
+    
+    $userinfo = get-aduser -Filter "name -like '$username*'"
+    Write-Host $userinfo
+    
+    $continue = Read-Host `n"Type any button to change user OR press ENTER to continue"
+} until ($continue -eq "")
 
-$userinfo = get-aduser -Filter "name -like '$username*'"
-Write-Host $userinfo
+Set-ADAccountPassword -identity $userinfo -NewPassword (ConvertTo-SecureString -AsPlainText $stdpwd -Force -Verbose
+Set-ADuser -Identity $userinfo -ChangePasswordAtLogon $true
 
-$continue = Read-Host `n"Reset password for user (y/n)?"
-
-if ($continue -eq "y") {
-    Set-ADAccountPassword -identity $userinfo -NewPassword (ConvertTo-SecureString -AsPlainText $stdpwd -Force -Verbose) 
-    Set-ADuser -Identity $userinfo -ChangePasswordAtLogon $true
-    Write-Host `n"Password has been reset"
-} else {
-    Write-Host `n"Password has not change"
-}
+Write-Host `n"Password has been reset"
 
 # users password info
 Get-ADUser -Filter "name -like '$username*'" -Properties * | Select-Object name, UserPrincipalName, pass*
